@@ -266,6 +266,8 @@ class Player{
         DEF = DE;
         AGI = AG;
         LUCK = 25 - VI - AT - DE - AG;
+        REFRESH();
+        System.out.println("你的属性已更新。");
     }
 }
 class N_P_C{
@@ -286,6 +288,7 @@ class N_P_C{
         ATK_U=(int)(ATK*LEVEL*(ATK_B/100.0));DEF_U=DEF*LEVEL;AGI_U=(int)(AGI*LEVEL*(AGI_B/100.0));
     }
     void RECOVER(){
+        ATK_B=100;
         AGI_B=100;
         ALIVE=true;
         REFRESH();
@@ -423,6 +426,8 @@ public class Orc {
         Player_U.Skill_E=Skills[0];
         Player_U.RESET();
         Player_U.RECOVER();
+        System.out.println("本程序依靠[Enter]交互，请常按[Enter]。按下[Enter]以继续。");
+        in.nextLine();
         System.out.println("————————————————————————————————————————————————————————————————————————————————");
         Player_U.CHECK();
         while(CONTINUE){
@@ -437,6 +442,7 @@ public class Orc {
                     case 1:
                         if(Player_U.ALIVE) {
                             READY=true;
+                            System.out.println("不胜利，毋宁死！");
                         }else {
                             System.out.println("你已无生命特征。请在主界面祈祷以复活。");
                         }
@@ -464,6 +470,7 @@ public class Orc {
                                     }
                                     break;
                                 case 3:
+                                    System.out.println("按下[Enter]以继续。");
                                     break;
                             }
                         }else {
@@ -485,6 +492,7 @@ public class Orc {
                         } while (!(T.t >= 0 && T.t < O_EMPTY));
                         Player_U.Outfit_E=Outfits[T.t];
                         Player_U.REFRESH();
+                        System.out.println("你装备了"+Player_U.Outfit_E.Name+"。");
                         break;
                     case 4:
                         System.out.println("#你的技能");
@@ -501,6 +509,7 @@ public class Orc {
                         } while (!(T.t >= 0 && T.t < S_EMPTY));
                         Player_U.Skill_E=Skills[T.t];
                         Player_U.REFRESH();
+                        System.out.println("你携带了"+Player_U.Skill_E.Name+"。");
                         break;
                     case 5:
                         System.out.println("#祈祷");
@@ -514,16 +523,19 @@ public class Orc {
                             if (Player_U.EXP >= Player_U.LEVEL * Player_U.LEVEL * 3) {
                                 Player_U.EXP-=Player_U.LEVEL * Player_U.LEVEL * 3;
                                 Player_U.RECOVER();
+                                System.out.println("你完全恢复了。");
                             }else{
                                 System.out.println("经验值不足！");
                                 System.out.println("你可以输入 I love CQUPT 以完全恢复。");
-                                in.nextLine();
                                 if(in.nextLine().equals("I love CQUPT")){
                                     Player_U.RECOVER();
+                                    System.out.println("你完全恢复了。");
                                 }else{
                                     System.out.println("输入错误!");
                                 }
                             }
+                        }else {
+                            System.out.println("按下[Enter]以继续。");
                         }
                         break;
                     case 6:
@@ -532,6 +544,7 @@ public class Orc {
                             SET=in.nextInt();
                             in.nextLine();
                         }while(!(SET>=1&&SET<=2));
+                        System.out.println("设置成功。");
                         break;
                     case 7:
                         System.out.println("#帮助");
@@ -571,15 +584,15 @@ public class Orc {
                                 System.out.println("就这一次哦。");
                                 break;
                         }
-                        in.nextLine();
                         break;
                     case 8:
                         return;
                 }
+                in.nextLine();
                 System.out.println("————————————————————————————————————————————————————————————————————————————————");
             }
             do{
-                System.out.print("建议多少级就打多少关，请选择关卡：");
+                System.out.print("建议多少级就打多少关，请选择关卡（1~5）：");
                 LEVEL=in.nextInt();
                 in.nextLine();
             }while(!(LEVEL>=1&&LEVEL<=5));
@@ -730,7 +743,6 @@ public class Orc {
                     T.SHOW_RED(ENEMY_U[T.t].CHECK_RED(), ENEMY_U[T.t].CHECK_RED_MAX());
                 }
                 System.out.print('\n');
-                in.nextLine();
                 if(Player_U.RED<=0){
                     Player_U.ALIVE=false;
                 }
@@ -742,6 +754,7 @@ public class Orc {
                     }
                 }
                 Player_U.REFRESH();
+                in.nextLine();
             }
             if(Player_U.ALIVE){
                 System.out.println("*****U Survived*****");
