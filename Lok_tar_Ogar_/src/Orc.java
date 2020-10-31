@@ -28,7 +28,7 @@ class Zero extends  Outfit{
 }
 class Frostmourne extends Outfit{
     {
-        Name="霜之哀伤";WEIGHT=3;SHARPNESS=3;PROTECTION=2;SPLASH=1;
+        Name="霜之哀伤";WEIGHT=3;SHARPNESS=3;PROTECTION=3;SPLASH=1;
     }
 }
 class JK extends Outfit{
@@ -38,7 +38,7 @@ class JK extends Outfit{
 }
 class Ninja_Suit extends Outfit{
     {
-        Name="神奇忍者";WEIGHT=-5;SHARPNESS=5;PROTECTION=2;SPLASH=1;
+        Name="神奇忍者";WEIGHT=-12;SHARPNESS=5;PROTECTION=3;SPLASH=1;
     }
 }
 class Dog_Tag extends Outfit{
@@ -64,18 +64,18 @@ class Shield extends Skill{
     }
     void TRIGGER(int SEQUENCE_Player,int SEQUENCE_N_P_C,ENEMY N_P_C_U,Player Player_U,int User,Tools T){
         if(SEQUENCE_Player>=100&&User==0) {
-            T.t -= N_P_C_U.CHECK_ATK_U() / 8;
+            T.t -=3;
             if (T.t < 0) {
                 T.t = 0;
             }
-            System.out.println("***"+N_P_C_U.CHECK_Name()+"的技能 "+Name+" 抵挡了"+N_P_C_U.CHECK_ATK_U() / 8+"点伤害。");
+            System.out.println("***"+N_P_C_U.CHECK_Name()+"的技能 "+Name+" 抵挡了"+3+"点伤害。");
         }
         if(SEQUENCE_N_P_C>=100&&User==1&&SEQUENCE_Player<100){
-            T.t-=Player_U.ATK_U/8;
+            T.t-=3;
             if (T.t < 0) {
                 T.t = 0;
             }
-            System.out.println("***"+Player_U.Name+"的技能 "+Name+" 抵挡了"+Player_U.ATK_U / 8+"点伤害。");
+            System.out.println("***"+Player_U.Name+"的技能 "+Name+" 抵挡了"+3+"点伤害。");
         }
     }
 }
@@ -356,7 +356,7 @@ class Slime extends N_P_C implements ENEMY{
 class Moa extends N_P_C implements ENEMY{
     {
         Skill_E=new Buffering();
-        Name="恐鸟";LEVEL=3;VIT=7;ATK=8;DEF=5;AGI=8;EXP=50;
+        Name="恐鸟";LEVEL=3;VIT=60;ATK=8;DEF=3;AGI=3;EXP=50;
         RECOVER();
     }
 }
@@ -370,7 +370,7 @@ class Bird extends N_P_C implements ENEMY{
 class Spartan extends N_P_C implements ENEMY{
     {
         Skill_E=new Strength();
-        Name="斯巴达狂战士";LEVEL=5;VIT=5;ATK=10;DEF=5;AGI=5;EXP=200;Time=2;
+        Name="斯巴达狂战士";LEVEL=5;VIT=5;ATK=4;DEF=8;AGI=5;EXP=200;Time=2;
         RECOVER();
     }
 }
@@ -413,10 +413,10 @@ public class Orc {
         Tools T=new Tools();
         boolean CONTINUE=true;
         boolean READY=false;
-        Outfit[] Outfits=new Outfit[5];
+        Outfit[] Outfits=new Outfit[8];
         Outfits[0]=new Zero();
         int O_EMPTY=1;
-        Skill[] Skills=new Skill[5];
+        Skill[] Skills=new Skill[8];
         Skills[0]=new NULL();
         int S_EMPTY=1;
         Scanner in=new Scanner(System.in);
@@ -426,7 +426,7 @@ public class Orc {
         Player_U.Skill_E=Skills[0];
         Player_U.RESET();
         Player_U.RECOVER();
-        System.out.println("本程序依靠[Enter]交互，请常按[Enter]。按下[Enter]以继续。");
+        System.out.println("本程序依靠[Enter]交互，请经常[Enter]。如果感觉啰嗦，长按[Enter]可快速过场。");
         in.nextLine();
         System.out.println("————————————————————————————————————————————————————————————————————————————————");
         Player_U.CHECK();
@@ -615,10 +615,12 @@ public class Orc {
                     ENEMY_U[0]=new Moa();
                     break;
                 case 4:
-                    N_N=2;
+                    N_N=4;
                     ENEMY_U=new ENEMY[N_N];
                     ENEMY_U[0]=new Bird();
                     ENEMY_U[1]=new Bird();
+                    ENEMY_U[2]=new Bird();
+                    ENEMY_U[3]=new Bird();
                     break;
                 case 5:
                     N_N=2;
@@ -698,8 +700,8 @@ public class Orc {
                         }while(!(N_P_C_BE_CHOSEN>=0&&N_P_C_BE_CHOSEN<=N_N-1));
                     }
                     T.t=Player_U.ATK_U-ENEMY_U[N_P_C_BE_CHOSEN].CHECK_DEF_U();
-                    if(T.t<0){
-                        T.t=0;
+                    if(T.t<1){
+                        T.t=1;
                     }
                     System.out.println("***你的动作 "+Player_U.Name+"对"+ENEMY_U[N_P_C_BE_CHOSEN].CHECK_Name()+"造成了"+T.t+"点伤害***");
                     Player_U.Skill_E.TRIGGER(SEQUENCE_Player,SEQUENCE_N_P_C[N_P_C_BE_CHOSEN],ENEMY_U[N_P_C_BE_CHOSEN],Player_U,1,T);
@@ -717,13 +719,10 @@ public class Orc {
                     SEQUENCE_Player=0;
                 }else if(SEQUENCE_N_P_C[N_P_C_TURN]>=100){
                     T.u=ENEMY_U[N_P_C_TURN].CHECK_ATK_U()-Player_U.DEF_U;
-                    if(T.u<0){
-                        T.u=0;
+                    if(T.u<1){
+                        T.u=1;
                     }
                     T.t=ENEMY_U[N_P_C_TURN].CHECK_Time()*T.u;
-                    if(T.t<0){
-                        T.t=0;
-                    }
                     System.out.print("***对方动作 "+ENEMY_U[N_P_C_TURN].CHECK_Name()+"对"+Player_U.Name+"造成了");
                     if(ENEMY_U[N_P_C_TURN].CHECK_Time()>1){
                         System.out.print(ENEMY_U[N_P_C_TURN].CHECK_Time()+"次");
