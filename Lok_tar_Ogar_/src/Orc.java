@@ -23,7 +23,7 @@ class Outfit{
 }
 class Zero extends  Outfit{
     {
-        Name="从零开始";WEIGHT=0;SHARPNESS=0;PROTECTION=0;SPLASH=0;
+        Name="从零开始";
     }
 }
 class Frostmourne extends Outfit{
@@ -39,6 +39,11 @@ class JK extends Outfit{
 class Ninja_Suit extends Outfit{
     {
         Name="神奇忍者";WEIGHT=-5;SHARPNESS=5;PROTECTION=2;SPLASH=1;
+    }
+}
+class Dog_Tag extends Outfit{
+    {
+        Name="狗牌";
     }
 }
 class Skill{
@@ -59,18 +64,18 @@ class Shield extends Skill{
     }
     void TRIGGER(int SEQUENCE_Player,int SEQUENCE_N_P_C,ENEMY N_P_C_U,Player Player_U,int User,Tools T){
         if(SEQUENCE_Player>=100&&User==0) {
-            T.t -= N_P_C_U.CHECK_ATK_U() / 2;
+            T.t -= N_P_C_U.CHECK_ATK_U() / 8;
             if (T.t < 0) {
                 T.t = 0;
             }
-            System.out.println("***"+N_P_C_U.CHECK_Name()+"的技能 "+Name+" 抵挡了"+N_P_C_U.CHECK_ATK_U() / 5+"点伤害。");
+            System.out.println("***"+N_P_C_U.CHECK_Name()+"的技能 "+Name+" 抵挡了"+N_P_C_U.CHECK_ATK_U() / 8+"点伤害。");
         }
         if(SEQUENCE_N_P_C>=100&&User==1&&SEQUENCE_Player<100){
-            T.t-=Player_U.ATK_U/5;
+            T.t-=Player_U.ATK_U/8;
             if (T.t < 0) {
                 T.t = 0;
             }
-            System.out.println("***"+Player_U.Name+"的技能 "+Name+" 抵挡了"+Player_U.ATK_U / 5+"点伤害。");
+            System.out.println("***"+Player_U.Name+"的技能 "+Name+" 抵挡了"+Player_U.ATK_U / 8+"点伤害。");
         }
     }
 }
@@ -132,6 +137,22 @@ class Buffering extends Skill{
             }else{
                 System.out.println("***" + N_P_C_U.CHECK_Name()+"的卸力发动失败。");
             }
+        }
+    }
+}
+class Strength extends Skill{
+    {
+        Name="强壮肌肉";
+        Description="大大幅提高总攻击。";
+    }
+    void TRIGGER(int SEQUENCE_Player,int SEQUENCE_N_P_C,ENEMY N_P_C_U,Player Player_U,int User,Tools T){
+        if(SEQUENCE_N_P_C>=100&&User==0&&SEQUENCE_Player<100){
+            N_P_C_U.CHANGE_ATK_B(100);
+            System.out.println("***" + N_P_C_U.CHECK_Name()+"捏了捏他的肌肉。");
+        }
+        if(SEQUENCE_Player>=100&&User==1){
+            Player_U.ATK_B+=100;
+            System.out.println("***" + Player_U.Name+"捏了捏他的肌肉。");
         }
     }
 }
@@ -238,6 +259,7 @@ class Player{
             AT = in.nextInt();
             DE = in.nextInt();
             AG = in.nextInt();
+            in.nextLine();
         } while (VI + AT + DE + AG > 25);
         VIT = VI;
         ATK = AT;
@@ -251,7 +273,7 @@ class N_P_C{
     boolean ALIVE;
     int LEVEL;
     int VIT,ATK,DEF,AGI;
-    int AGI_B;
+    int AGI_B,ATK_B;
     int RED_MAX,ATK_U,DEF_U,AGI_U;
     int RED;
     int Time;
@@ -261,7 +283,7 @@ class N_P_C{
     }
     public void REFRESH(){
         RED_MAX=VIT*3*LEVEL;
-        ATK_U=ATK*LEVEL;DEF_U=DEF*LEVEL;AGI_U=(int)(AGI*LEVEL*(AGI_B/100.0));
+        ATK_U=(int)(ATK*LEVEL*(ATK_B/100.0));DEF_U=DEF*LEVEL;AGI_U=(int)(AGI*LEVEL*(AGI_B/100.0));
     }
     void RECOVER(){
         AGI_B=100;
@@ -278,6 +300,9 @@ class N_P_C{
             ALIVE=false;
         }
         return ALIVE;
+    }
+    public void CHANGE_ATK_B(int VALUE){
+        ATK_B+=VALUE;
     }
     public int CHECK_Time(){ return Time;}
     public void CHANGE_AGI_B(int PERCENT){
@@ -335,11 +360,19 @@ class Moa extends N_P_C implements ENEMY{
 class Bird extends N_P_C implements ENEMY{
     {
         Skill_E=new Buffering();
-        Name="大鸟";LEVEL=4;VIT=1;ATK=6;DEF=8;AGI=8;EXP=50;Time=8;
+        Name="大鸟";LEVEL=4;VIT=2;ATK=6;DEF=8;AGI=8;EXP=50;Time=8;
+        RECOVER();
+    }
+}
+class Spartan extends N_P_C implements ENEMY{
+    {
+        Skill_E=new Strength();
+        Name="斯巴达狂战士";LEVEL=5;VIT=5;ATK=10;DEF=5;AGI=5;EXP=200;Time=2;
         RECOVER();
     }
 }
 interface ENEMY{
+    void CHANGE_ATK_B(int VALUE);
     void REFRESH();
     int CHECK_Time();
     void CHANGE_AGI_B(int PERCENT);
@@ -357,18 +390,20 @@ interface ENEMY{
 }
 public class Orc {
     public static void main(String[] args){
+        int SET=1;
         boolean CHECK_JK=false;
         int RESET_FREE=5;
         int EXP_SUM;
         boolean LAST_SEQUENCE;
         int N_P_C_TURN=0;
-        int N_P_C_RED_MIN;
+        int N_P_C_RED_MIN=0;
+        int N_P_C_BE_CHOSEN;
         boolean IS_SEQUENCE_N_P_C;
         int SEQUENCE_Player;
         int[] SEQUENCE_N_P_C;
         boolean IS_ALIVE;
-        boolean[] BINGO_O=new boolean[4];
-        boolean[] BINGO_S=new boolean[4];
+        boolean[] BINGO_O=new boolean[5];
+        boolean[] BINGO_S=new boolean[5];
         ENEMY[] ENEMY_U=null;
         int N_N=0;
         int LEVEL;
@@ -394,9 +429,10 @@ public class Orc {
             while(!READY){
                 do{
                     System.out.println("#主界面");
-                    System.out.println("1.Lok'tar Ogar(战斗)！  2.你的信息  3.你的装备  4.你的技能  5.祈祷  6.结束  7.先来这里看看");
+                    System.out.println("1.Lok'tar Ogar(战斗)！  2.你的信息  3.你的装备  4.你的技能  5.祈祷  6.设置  7.先来这里看看  8.结束");
                     T.t=in.nextInt();
-                }while(!(T.t>=1&&T.t<=7));
+                    in.nextLine();
+                }while(!(T.t>=1&&T.t<=8));
                 switch (T.t) {
                     case 1:
                         if(Player_U.ALIVE) {
@@ -413,6 +449,7 @@ public class Orc {
                                 System.out.println("2.想洗点吗？需要花费" + Player_U.LEVEL * Player_U.LEVEL * 3 + "点经验。");
                                 System.out.println("3.再见。");
                                 T.t = in.nextInt();
+                                in.nextLine();
                             } while (!(T.t >= 1 && T.t <= 3));
                             switch (T.t) {
                                 case 1:
@@ -444,6 +481,7 @@ public class Orc {
                         do {
                             System.out.println("输入序号即可装备。在“你的信息”中可查看装备详情。");
                             T.t = in.nextInt();
+                            in.nextLine();
                         } while (!(T.t >= 0 && T.t < O_EMPTY));
                         Player_U.Outfit_E=Outfits[T.t];
                         Player_U.REFRESH();
@@ -459,6 +497,7 @@ public class Orc {
                         do {
                             System.out.println("输入序号即可携带。在“你的信息”中可查看技能详情。");
                             T.t = in.nextInt();
+                            in.nextLine();
                         } while (!(T.t >= 0 && T.t < S_EMPTY));
                         Player_U.Skill_E=Skills[T.t];
                         Player_U.REFRESH();
@@ -469,6 +508,7 @@ public class Orc {
                             System.out.println("你可以花费"+Player_U.LEVEL*Player_U.LEVEL*3+"点经验以完全恢复。");
                             System.out.println("1.确定  2.取消");
                             T.t=in.nextInt();
+                            in.nextLine();
                         }while(!(T.t>=1&&T.t<=2));
                         if(T.t==1){
                             if (Player_U.EXP >= Player_U.LEVEL * Player_U.LEVEL * 3) {
@@ -487,7 +527,12 @@ public class Orc {
                         }
                         break;
                     case 6:
-                        return;
+                        do{
+                            System.out.println("对战多个敌人时，你希望： 1.自动攻击血量较少的敌人（推荐）  2.由我自己选择目标");
+                            SET=in.nextInt();
+                            in.nextLine();
+                        }while(!(SET>=1&&SET<=2));
+                        break;
                     case 7:
                         System.out.println("#帮助");
                         do{
@@ -497,6 +542,7 @@ public class Orc {
                             }
                             System.out.print('\n');
                             T.t=in.nextInt();
+                            in.nextLine();
                         }while(!(T.t>=1&&T.t<=RESET_FREE));
                         switch (T.t){
                             case 1:
@@ -522,17 +568,21 @@ public class Orc {
                                 System.out.println("WKing_的配点是5 10 5 5。放弃了幸运（并不是说幸运无用）。");
                                 Player_U.RESET();
                                 RESET_FREE--;
+                                System.out.println("就这一次哦。");
                                 break;
                         }
-                        in.nextLine();in.nextLine();
+                        in.nextLine();
                         break;
+                    case 8:
+                        return;
                 }
                 System.out.println("————————————————————————————————————————————————————————————————————————————————");
             }
             do{
                 System.out.print("建议多少级就打多少关，请选择关卡：");
                 LEVEL=in.nextInt();
-            }while(!(LEVEL>=1&&LEVEL<=4));
+                in.nextLine();
+            }while(!(LEVEL>=1&&LEVEL<=5));
             switch (LEVEL) {
                 case 1:
                     N_N=1;
@@ -558,7 +608,10 @@ public class Orc {
                     ENEMY_U[1]=new Bird();
                     break;
                 case 5:
-
+                    N_N=2;
+                    ENEMY_U=new ENEMY[N_N];
+                    ENEMY_U[0]=new Spartan();
+                    ENEMY_U[1]=new Slime();
             }
             SEQUENCE_N_P_C=new int[N_N];
             System.out.println("你发现了敌人。");
@@ -573,7 +626,7 @@ public class Orc {
             T.SHOW_RED(Player_U.RED,Player_U.RED_MAX);
             System.out.print('\n');
             System.out.println("按下[Enter]以继续。");
-            in.nextLine();in.nextLine();
+            in.nextLine();
             IS_ALIVE=true;
             SEQUENCE_Player=0;
             for(T.t=0;T.t<N_N;T.t++){
@@ -605,34 +658,45 @@ public class Orc {
                     System.out.print(Player_U.Name + "的顺序值=" + SEQUENCE_Player + "  V.S  ");
                     for (T.t = 0; T.t < N_N; T.t++) {
                         if (ENEMY_U[T.t].IS_ALIVE()) {
-                            System.out.print(ENEMY_U[T.t].CHECK_Name() + "的顺序值=" + SEQUENCE_N_P_C[T.t] + "  ");
+                            System.out.print(T.t+"."+ENEMY_U[T.t].CHECK_Name() + "的顺序值=" + SEQUENCE_N_P_C[T.t] + "  ");
                         }
                     }
                     System.out.print("\n");
                 }
                 if(SEQUENCE_Player>=100){
-                    N_P_C_RED_MIN=0;
-                    for(T.t=0;T.t<N_N;T.t++){
-                        if(ENEMY_U[T.t].IS_ALIVE()&&(ENEMY_U[T.t].CHECK_RED()<ENEMY_U[N_P_C_RED_MIN].CHECK_RED())){
-                            N_P_C_RED_MIN=T.t;
+                    if(SET==1){
+                        for(T.t=0;T.t<N_N;T.t++){
+                            if(ENEMY_U[T.t].IS_ALIVE()){
+                                N_P_C_RED_MIN=T.t;
+                                break;
+                            }
                         }
-                        if(!ENEMY_U[N_P_C_RED_MIN].IS_ALIVE()){
-                            N_P_C_RED_MIN++;
+                        for(T.t=0;T.t<N_N;T.t++){
+                            if(ENEMY_U[T.t].IS_ALIVE()&&(ENEMY_U[T.t].CHECK_RED()<ENEMY_U[N_P_C_RED_MIN].CHECK_RED())){
+                                N_P_C_RED_MIN=T.t;
+                            }
                         }
+                        N_P_C_BE_CHOSEN=N_P_C_RED_MIN;
+                    }else{
+                        do{
+                            System.out.print("请输入你要进攻的序号：");
+                            N_P_C_BE_CHOSEN=in.nextInt();
+                            in.nextLine();
+                        }while(!(N_P_C_BE_CHOSEN>=0&&N_P_C_BE_CHOSEN<=N_N-1));
                     }
-                    T.t=Player_U.ATK_U-ENEMY_U[N_P_C_RED_MIN].CHECK_DEF_U();
+                    T.t=Player_U.ATK_U-ENEMY_U[N_P_C_BE_CHOSEN].CHECK_DEF_U();
                     if(T.t<0){
                         T.t=0;
                     }
-                    System.out.println("***你的动作 "+Player_U.Name+"对"+ENEMY_U[N_P_C_RED_MIN].CHECK_Name()+"造成了"+T.t+"点伤害***");
-                    Player_U.Skill_E.TRIGGER(SEQUENCE_Player,SEQUENCE_N_P_C[N_P_C_RED_MIN],ENEMY_U[N_P_C_RED_MIN],Player_U,1,T);
-                    ENEMY_U[N_P_C_RED_MIN].Skill(SEQUENCE_Player,SEQUENCE_N_P_C[N_P_C_RED_MIN],ENEMY_U[N_P_C_RED_MIN],Player_U,0,T);
-                    ENEMY_U[N_P_C_RED_MIN].BE_ATTACKED(T.t);
+                    System.out.println("***你的动作 "+Player_U.Name+"对"+ENEMY_U[N_P_C_BE_CHOSEN].CHECK_Name()+"造成了"+T.t+"点伤害***");
+                    Player_U.Skill_E.TRIGGER(SEQUENCE_Player,SEQUENCE_N_P_C[N_P_C_BE_CHOSEN],ENEMY_U[N_P_C_BE_CHOSEN],Player_U,1,T);
+                    ENEMY_U[N_P_C_BE_CHOSEN].Skill(SEQUENCE_Player,SEQUENCE_N_P_C[N_P_C_BE_CHOSEN],ENEMY_U[N_P_C_BE_CHOSEN],Player_U,0,T);
+                    ENEMY_U[N_P_C_BE_CHOSEN].BE_ATTACKED(T.t);
                     if(Player_U.Outfit_E.SPLASH!=0) {
                         for (T.t = 0; T.t < N_N; T.t++) {
-                            if (T.t != N_P_C_RED_MIN) {
+                            if (T.t != N_P_C_BE_CHOSEN) {
                                 ENEMY_U[T.t].BE_ATTACKED(Player_U.Outfit_E.SPLASH);
-                                System.out.print("***" + ENEMY_U[T.t].CHECK_Name() + "受到了" + Player_U.Outfit_E.SPLASH + "点溅射伤害");
+                                System.out.print("***" + ENEMY_U[T.t].CHECK_Name() + "受到了" + Player_U.Outfit_E.SPLASH + "点溅射伤害。");
                                 System.out.print("\n");
                             }
                         }
@@ -749,6 +813,24 @@ public class Orc {
                             }
                         }
                         break;
+                    case 5:
+                        if(!BINGO_O[4]){
+                            for(O_EMPTY=0;Outfits[O_EMPTY]!=null;O_EMPTY++);
+                            Outfits[O_EMPTY]=new Dog_Tag();
+                            System.out.println(">>>Lok'tar Ogar!不胜利，毋宁死！");
+                            System.out.println(">>>你拽下了这个战士的狗牌。");
+                            System.out.println(">>>或许你应该去找这个鬼地方的建造者。");
+                            BINGO_O[4]=true;
+                        }
+                        if(!BINGO_S[4]) {
+                            for(S_EMPTY=0;Skills[S_EMPTY]!=null;S_EMPTY++);
+                            if (Player_U.Skill_E.Name.equals("从无到有")) {
+                                Skills[S_EMPTY] = new Strength();
+                                System.out.println(">>>你的技能 从无到有 发动。");
+                                System.out.println(">>>你获得了一个技能。");
+                                BINGO_S[4] = true;
+                            }
+                        }
                 }
                 EXP_SUM=0;
                 for(T.t=0;T.t<N_N;T.t++){
@@ -757,7 +839,6 @@ public class Orc {
                 System.out.println("你获得了"+EXP_SUM+"点经验。你的熟练度增加了，如果你足够幸运的话。");
                 Player_U.EXP+=EXP_SUM;
                 Player_U.PRA+=Player_U.LUCK;
-                in.nextLine();
             }else{
                 System.out.println("*****U Died*****");
             }
