@@ -40,7 +40,7 @@ class JK extends Outfit{
 }
 class Ninja_Suit extends Outfit{
     {
-        Name="神奇忍者";WEIGHT=-12;SHARPNESS=5;PROTECTION=3;SPLASH=1;
+        Name="神奇忍者";WEIGHT=-15;
     }
 }
 class Dog_Tag extends Outfit{
@@ -134,7 +134,11 @@ class Buffering extends Skill{
             }
         }
         if(SEQUENCE_Player>=100&&User==0){
-            if(N_P_C_U.CHECK_AGI_U()>=24) {
+            int VALUE=24;
+            if(N_P_C_U.CHECK_Name().contains("鸟")){
+                VALUE=9;
+            }
+            if(N_P_C_U.CHECK_AGI_U()>=VALUE) {
                 T.t /= 2;
                 System.out.println("***" + N_P_C_U.CHECK_Name()+"卸去了一半的伤害。");
             }else{
@@ -374,10 +378,17 @@ class Slime extends N_P_C{
         RECOVER();
     }
 }
-class Moa extends N_P_C{
+class Giant_Slime extends N_P_C{
+    {
+        Skill_E=new Slime_n();
+        Name="巨大化史莱姆";LEVEL=4;VIT=3;ATK=3;DEF=3;AGI=5;EXP=10;
+        RECOVER();
+    }
+}
+class Fat_Moa extends N_P_C{
     {
         Skill_E=new Buffering();
-        Name="恐鸟";LEVEL=3;VIT=60;ATK=8;DEF=3;AGI=3;EXP=50;
+        Name="好肥的恐鸟";LEVEL=3;VIT=60;ATK=8;DEF=3;AGI=3;EXP=50;
         RECOVER();
     }
 }
@@ -656,7 +667,7 @@ public class Orc {
                 case 3:
                     N_N=1;
                     ENEMY_U=new ENEMY[N_N];
-                    ENEMY_U[0]=new Moa();
+                    ENEMY_U[0]=new Fat_Moa();
                     break;
                 case 4:
                     N_N=4;
@@ -670,7 +681,7 @@ public class Orc {
                     N_N=2;
                     ENEMY_U=new ENEMY[N_N];
                     ENEMY_U[0]=new Spartan();
-                    ENEMY_U[1]=new Slime();
+                    ENEMY_U[1]=new Giant_Slime();
                     break;
                 case 6:
                     String Na;int Le,VI,AT,DE,AG,Ti,EX;
