@@ -289,7 +289,6 @@ class N_P_C implements ENEMY{
         Time=1;//大多数NPC没有连击。
     }
     N_P_C(){
-        RECOVER();
     }
     N_P_C(String Na,int Le,int VI,int AT,int DE,int AG,int Ti,int EX,Skill S_E){
         Name=Na;
@@ -365,30 +364,35 @@ class Soldier extends N_P_C{
     {
         Skill_E=new Shield();
         Name="人类守卫";LEVEL=1;VIT=3;ATK=8;DEF=2;AGI=8;EXP=5;
+        RECOVER();
     }
 }
 class Slime extends N_P_C{
     {
         Skill_E=new Slime_n();
         Name="史莱姆";LEVEL=2;VIT=3;ATK=9;DEF=3;AGI=5;EXP=10;
+        RECOVER();
     }
 }
 class Moa extends N_P_C{
     {
         Skill_E=new Buffering();
         Name="恐鸟";LEVEL=3;VIT=60;ATK=8;DEF=3;AGI=3;EXP=50;
+        RECOVER();
     }
 }
 class Bird extends N_P_C{
     {
         Skill_E=new Buffering();
         Name="大鸟";LEVEL=4;VIT=2;ATK=6;DEF=8;AGI=8;EXP=50;Time=8;
+        RECOVER();
     }
 }
 class Spartan extends N_P_C{
     {
         Skill_E=new Strength();
         Name="斯巴达狂战士";LEVEL=5;VIT=5;ATK=4;DEF=8;AGI=5;EXP=200;Time=2;
+        RECOVER();
     }
 }
 //以上是NPC类：更详细的注释已写在上面。NPC的属性与玩家大同小异。
