@@ -1,4 +1,5 @@
 import java.util.Scanner;
+//
 class Tools{
     int t;
     int u;
@@ -18,6 +19,7 @@ class Tools{
         System.out.print(">");
     }
 }
+//以上是工具类：辅助我完成程序。包括两个变量和一个方法：血条显示。
 class Outfit{
     String Name;int WEIGHT,SHARPNESS,PROTECTION,SPLASH;
 }
@@ -46,6 +48,7 @@ class Dog_Tag extends Outfit{
         Name="狗牌";
     }
 }
+//以上是装备类：共五种。
 class Skill{
     String Name;
     String Description;
@@ -156,37 +159,38 @@ class Strength extends Skill{
         }
     }
 }
+//以上是技能类：共六种。无论是NPC还是玩家，都能通过引用技能以使用。
 class Player{
     Tools T=new Tools();
     String Name;
     boolean ALIVE;
     int EXP,LEVEL;
-    int VIT,ATK,DEF,AGI,LUCK;
-    int PRA;
-    int ATK_B,DEF_B,AGI_B;
-    int RED_MAX,ATK_U,DEF_U,AGI_U;
-    int RED;
+    int VIT,ATK,DEF,AGI,LUCK;//五种属性。
+    int PRA;//熟练度。
+    int ATK_B,DEF_B,AGI_B;//B即BUFF。用来完成 非永久BUFF 的效果。
+    int RED_MAX,ATK_U,DEF_U,AGI_U;//RED_MAX即最大血量。U即Ultimate。用公式计算的总属性。详见方法：REFRESH。
+    int RED;//即当前血量。
     {
-        LEVEL=1;
+        LEVEL=1;//等级初始为1；
     }
     Player(String Na){
         Name=Na;
-    }
-    Outfit Outfit_E;
-    Skill Skill_E;
-    void REFRESH(){
+    }//构造器。命名。
+    Outfit Outfit_E;//装备栏。
+    Skill Skill_E;//技能栏。
+    void REFRESH(){//方法：更新总属性。
         RED_MAX=(int)(VIT*3*LEVEL*(1+PRA/50.0));
         ATK_U=(int)((ATK*LEVEL*(1+PRA/30.0)+Outfit_E.SHARPNESS)*(ATK_B/100.0));
         DEF_U=(int)((DEF*LEVEL*(1+PRA/30.0)+Outfit_E.PROTECTION)*(DEF_B/100.0));
         AGI_U=(int)((AGI*LEVEL*(1+PRA/30.0)-Outfit_E.WEIGHT)*(AGI_B/100.0));
     }
-    void RECOVER(){
+    void RECOVER(){//方法：完全恢复。
         ALIVE=true;
         ATK_B=100;DEF_B=100;AGI_B=100;
         REFRESH();
         RED=RED_MAX;
     }
-    int CHECK_EXP_N(){
+    int CHECK_EXP_N(){//方法：检索当前升级需要的经验。
         int EXP_N;
         switch(LEVEL){
             case 1:
@@ -206,7 +210,7 @@ class Player{
         }
         return EXP_N;
     }
-    void LEVEL_UP(){
+    void LEVEL_UP(){//方法：升级。
         if(LEVEL<5&&EXP>=CHECK_EXP_N()){
             int RED_DFF=RED_MAX-RED;
             EXP-=CHECK_EXP_N();
@@ -214,13 +218,13 @@ class Player{
             REFRESH();
             RED=RED_MAX-RED_DFF;
             System.out.println("现在你"+LEVEL+"级了！");
-        }else if(LEVEL==5){
+        }else if(LEVEL>=5){
             System.out.println("你已经满级了！");
         }else{
             System.out.println("经验值不足！");
         }
     }
-    void CHECK(){
+    void CHECK(){//方法：查看玩家信息。
         System.out.println("#你的信息");
         if(Outfit_E.Name.equals("JK制服")){
             System.out.print("女装");
@@ -247,14 +251,14 @@ class Player{
             System.out.print('\n');
         }
     }
-    void RESET() {
+    void RESET() {//方法：重置基本属性。
         System.out.println("当前：耐力=" + VIT + " 攻击=" + ATK + " 防御=" + DEF + " 敏捷=" + AGI);
         Scanner in = new Scanner(System.in);
         System.out.println("幸运=25-耐力-攻击-防御-敏捷");
-        System.out.println("显然，属性之和<25");
-        System.out.print("耐力 攻击 防御 敏捷：");
         int VI, AT, DE, AG;
         do {
+            System.out.println("显然，属性之和<25");
+            System.out.print("耐力 攻击 防御 敏捷：");
             VI = in.nextInt();
             AT = in.nextInt();
             DE = in.nextInt();
@@ -270,7 +274,8 @@ class Player{
         System.out.println("你的属性已更新。");
     }
 }
-class N_P_C{
+//以上是玩家类。更详细的注释已写在上面。
+class N_P_C implements ENEMY{
     String Name;
     boolean ALIVE;
     int LEVEL;
@@ -278,10 +283,25 @@ class N_P_C{
     int AGI_B,ATK_B;
     int RED_MAX,ATK_U,DEF_U,AGI_U;
     int RED;
-    int Time;
-    int EXP;
+    int Time;//连击：指每回合可攻击的次数。
+    int EXP;//即击杀此NPC后玩家获得的经验。
     {
-        Time=1;
+        Time=1;//大多数NPC没有连击。
+    }
+    N_P_C(){
+        RECOVER();
+    }
+    N_P_C(String Na,int Le,int VI,int AT,int DE,int AG,int Ti,int EX,Skill S_E){
+        Name=Na;
+        LEVEL=Le;
+        VIT=VI;
+        ATK=AT;
+        DEF=DE;
+        AGI=AG;
+        Time=Ti;
+        EXP=EX;
+        Skill_E=S_E;
+        RECOVER();
     }
     public void REFRESH(){
         RED_MAX=VIT*3*LEVEL;
@@ -294,7 +314,8 @@ class N_P_C{
         REFRESH();
         RED=RED_MAX;
     }
-    Skill Skill_E;
+    Skill Skill_E;//每个NPC都有一个技能。
+    //
     public void BE_ATTACKED(int VALUE){
         RED-=VALUE;
     }
@@ -337,43 +358,40 @@ class N_P_C{
     }
     public void Skill(int SEQUENCE_Player,int SEQUENCE_N_P_C,ENEMY N_P_C_U,Player Player_U,int User,Tools T){
         Skill_E.TRIGGER(SEQUENCE_Player,SEQUENCE_N_P_C,N_P_C_U,Player_U,User,T);
+        //以上是为了满足接口
     }
 }
-class Soldier extends N_P_C implements ENEMY{
+class Soldier extends N_P_C{
     {
         Skill_E=new Shield();
         Name="人类守卫";LEVEL=1;VIT=3;ATK=8;DEF=2;AGI=8;EXP=5;
-        RECOVER();
     }
 }
-class Slime extends N_P_C implements ENEMY{
+class Slime extends N_P_C{
     {
         Skill_E=new Slime_n();
         Name="史莱姆";LEVEL=2;VIT=3;ATK=9;DEF=3;AGI=5;EXP=10;
-        RECOVER();
     }
 }
-class Moa extends N_P_C implements ENEMY{
+class Moa extends N_P_C{
     {
         Skill_E=new Buffering();
         Name="恐鸟";LEVEL=3;VIT=60;ATK=8;DEF=3;AGI=3;EXP=50;
-        RECOVER();
     }
 }
-class Bird extends N_P_C implements ENEMY{
+class Bird extends N_P_C{
     {
         Skill_E=new Buffering();
         Name="大鸟";LEVEL=4;VIT=2;ATK=6;DEF=8;AGI=8;EXP=50;Time=8;
-        RECOVER();
     }
 }
-class Spartan extends N_P_C implements ENEMY{
+class Spartan extends N_P_C{
     {
         Skill_E=new Strength();
         Name="斯巴达狂战士";LEVEL=5;VIT=5;ATK=4;DEF=8;AGI=5;EXP=200;Time=2;
-        RECOVER();
     }
 }
+//以上是NPC类：更详细的注释已写在上面。NPC的属性与玩家大同小异。
 interface ENEMY{
     void CHANGE_ATK_B(int VALUE);
     void REFRESH();
@@ -391,9 +409,12 @@ interface ENEMY{
     String CHECK_Skill_Name();
     void Skill(int SEQUENCE_Player,int SEQUENCE_N_P_C,ENEMY N_P_C_U,Player Player_U,int User,Tools T);
 }
+//以上为接口。
 public class Orc {
     public static void main(String[] args){
+        Skill S_E=null;
         int SET=1;
+        boolean CHECK_CHEAT=false;
         boolean CHECK_JK=false;
         int RESET_FREE=5;
         int EXP_SUM;
@@ -419,6 +440,7 @@ public class Orc {
         Skill[] Skills=new Skill[8];
         Skills[0]=new NULL();
         int S_EMPTY=1;
+        //以上是用到的所有变量。
         Scanner in=new Scanner(System.in);
         System.out.print("你的名字：");
         Player Player_U=new Player(in.nextLine());
@@ -426,6 +448,7 @@ public class Orc {
         Player_U.Skill_E=Skills[0];
         Player_U.RESET();
         Player_U.RECOVER();
+        //以上是创建玩家。
         System.out.println("本程序依靠[Enter]交互，请经常[Enter]。如果感觉啰嗦，长按[Enter]可快速过场。");
         in.nextLine();
         System.out.println("————————————————————————————————————————————————————————————————————————————————");
@@ -479,7 +502,7 @@ public class Orc {
                         break;
                     case 3:
                         System.out.println("#你的装备");
-                        for(O_EMPTY=0;Outfits[O_EMPTY]!=null;O_EMPTY++);
+                        for(O_EMPTY=0;Outfits[O_EMPTY]!=null;O_EMPTY++);//检测空的装备格，
                         T.t=0;
                         while(Outfits[T.t]!=null){
                             System.out.println(T.t+"."+Outfits[T.t].Name);
@@ -496,7 +519,7 @@ public class Orc {
                         break;
                     case 4:
                         System.out.println("#你的技能");
-                        for(S_EMPTY=0;Skills[S_EMPTY]!=null;S_EMPTY++);
+                        for(S_EMPTY=0;Skills[S_EMPTY]!=null;S_EMPTY++);//检测空的技能格。
                         T.t=0;
                         while(Skills[T.t]!=null){
                             System.out.println(T.t+"."+Skills[T.t].Name);
@@ -574,7 +597,24 @@ public class Orc {
                                     Outfits[O_EMPTY] = new JK();
                                     CHECK_JK=true;
                                 }else{
-                                    System.out.println("没福利了。我的扣扣：487666740。");
+                                    if(!CHECK_CHEAT) {
+                                        do {
+                                            System.out.println("开启内置挂？将等级强制设定为10级。我的扣扣：487666740。");
+                                            System.out.println("1.确定  2.取消");
+                                            T.t = in.nextInt();
+                                            in.nextLine();
+                                        } while (!(T.t >= 1 && T.t <= 2));
+                                        if (T.t == 1) {
+                                            Player_U.LEVEL = 10;
+                                            Player_U.REFRESH();
+                                            CHECK_CHEAT=true;
+                                            System.out.println("现在你" + Player_U.LEVEL + "级了！");
+                                        } else {
+                                            System.out.println("按下[Enter]以继续。");
+                                        }
+                                    }else {
+                                        System.out.println("我一点也没有了。我的扣扣：487666740。");
+                                    }
                                 }
                                 break;
                             case 5:
@@ -592,10 +632,10 @@ public class Orc {
                 System.out.println("————————————————————————————————————————————————————————————————————————————————");
             }
             do{
-                System.out.print("建议多少级就打多少关，请选择关卡（1~5）：");
+                System.out.print("建议多少级就打多少关，请选择关卡（1~5,6为自定义关卡）：");
                 LEVEL=in.nextInt();
                 in.nextLine();
-            }while(!(LEVEL>=1&&LEVEL<=5));
+            }while(!(LEVEL>=1&&LEVEL<=6));
             switch (LEVEL) {
                 case 1:
                     N_N=1;
@@ -627,7 +667,49 @@ public class Orc {
                     ENEMY_U=new ENEMY[N_N];
                     ENEMY_U[0]=new Spartan();
                     ENEMY_U[1]=new Slime();
+                    break;
+                case 6:
+                    String Na;int Le,VI,AT,DE,AG,Ti,EX;
+                    System.out.print("此为自定义关卡，请输入NPC数量：");
+                    N_N=in.nextInt();
+                    in.nextLine();
+                    ENEMY_U=new ENEMY[N_N];
+                    for(T.t=0;T.t<N_N;T.t++) {
+                        System.out.println(">>>现在构建第"+(T.t+1)+"个NPC。");
+                        System.out.print("请输入NPC的名字：");
+                        Na = in.nextLine();
+                        System.out.print("请输入NPC的等级 耐力 攻击 防御 敏捷 连击(没有则为1) 击杀后玩家获得的经验：");
+                        Le=in.nextInt();VI= in.nextInt();AT= in.nextInt();DE= in.nextInt();AG= in.nextInt();Ti= in.nextInt();EX= in.nextInt();
+                        in.nextLine();
+                        do{
+                            System.out.println("请选择NPC的技能： 1.护盾 2.黏液 3.荆棘 4.卸力 5.强壮肌肉");
+                            T.u= in.nextInt();
+                            in.nextLine();
+                        }while(!(T.u>=1&&T.u<=5));
+                        switch (T.u){
+                            case 1:
+                                S_E=new Shield();
+                                break;
+                            case 2:
+                                S_E=new Slime_n();
+                                break;
+                            case 3:
+                                S_E=new Thorns();
+                                break;
+                            case 4:
+                                S_E=new Buffering();
+                                break;
+                            case 5:
+                                S_E=new Strength();
+                        }
+                        ENEMY_U[T.t]=new N_P_C(Na,Le,VI,AT,DE,AG,Ti,EX,S_E);
+                    }
+                    System.out.println("构建完成。");
+                    in.nextLine();
             }
+            //以下为战斗系统。通用性很强的战斗系统。随意多的NPC数量，随意多的NPC种类。
+            //并不是单纯的回合制。引用了行动条机制。详见游戏内的“先来这里看看”菜单。
+            //大量的代码用来优化细节。
             SEQUENCE_N_P_C=new int[N_N];
             System.out.println("你发现了敌人。");
             for(T.t=0;T.t<N_N;T.t++) {
@@ -637,6 +719,7 @@ public class Orc {
                 }
                 System.out.print('\n');
             }
+            //以上显示所有NPC的简单信息。
             System.out.print("你的血量："+Player_U.RED+"/"+Player_U.RED_MAX);
             T.SHOW_RED(Player_U.RED,Player_U.RED_MAX);
             System.out.print('\n');
@@ -647,6 +730,7 @@ public class Orc {
             for(T.t=0;T.t<N_N;T.t++){
                 SEQUENCE_N_P_C[T.t]=0;
             }
+            //清零所有单位的顺序值。
             while(Player_U.ALIVE&&IS_ALIVE){
                 IS_SEQUENCE_N_P_C=true;
                 LAST_SEQUENCE=false;
@@ -657,6 +741,7 @@ public class Orc {
                         IS_SEQUENCE_N_P_C=false;
                     }
                 }
+                //以上：当有多个NPC顺序值达到了100，则停止顺序值的累加，先让所有顺序值达到100的NPC开始回合。
                 while(SEQUENCE_Player<100&&IS_SEQUENCE_N_P_C){
                     SEQUENCE_Player+=Player_U.AGI_U;
                     for(T.t=0;T.t<N_N;T.t++){
@@ -669,6 +754,7 @@ public class Orc {
                         }
                     }
                 }
+                //以上：累加顺序值。
                 if(!(SEQUENCE_Player<100&&LAST_SEQUENCE)) {
                     System.out.print(Player_U.Name + "的顺序值=" + SEQUENCE_Player + "  V.S  ");
                     for (T.t = 0; T.t < N_N; T.t++) {
@@ -678,6 +764,7 @@ public class Orc {
                     }
                     System.out.print("\n");
                 }
+                //以上：显示当前顺序值。
                 if(SEQUENCE_Player>=100){
                     if(SET==1){
                         for(T.t=0;T.t<N_N;T.t++){
@@ -692,6 +779,7 @@ public class Orc {
                             }
                         }
                         N_P_C_BE_CHOSEN=N_P_C_RED_MIN;
+                        //以上：设置：自动攻击血量较少的敌人。
                     }else{
                         do{
                             System.out.print("请输入你要进攻的序号：");
@@ -699,13 +787,14 @@ public class Orc {
                             in.nextLine();
                         }while(!(N_P_C_BE_CHOSEN>=0&&N_P_C_BE_CHOSEN<=N_N-1));
                     }
-                    T.t=Player_U.ATK_U-ENEMY_U[N_P_C_BE_CHOSEN].CHECK_DEF_U();
+                    //以上：设置：玩家自行选择目标。
+                    T.t=Player_U.ATK_U-ENEMY_U[N_P_C_BE_CHOSEN].CHECK_DEF_U();//计算扣血。
                     if(T.t<1){
                         T.t=1;
                     }
                     System.out.println("***你的动作 "+Player_U.Name+"对"+ENEMY_U[N_P_C_BE_CHOSEN].CHECK_Name()+"造成了"+T.t+"点伤害***");
-                    Player_U.Skill_E.TRIGGER(SEQUENCE_Player,SEQUENCE_N_P_C[N_P_C_BE_CHOSEN],ENEMY_U[N_P_C_BE_CHOSEN],Player_U,1,T);
-                    ENEMY_U[N_P_C_BE_CHOSEN].Skill(SEQUENCE_Player,SEQUENCE_N_P_C[N_P_C_BE_CHOSEN],ENEMY_U[N_P_C_BE_CHOSEN],Player_U,0,T);
+                    Player_U.Skill_E.TRIGGER(SEQUENCE_Player,SEQUENCE_N_P_C[N_P_C_BE_CHOSEN],ENEMY_U[N_P_C_BE_CHOSEN],Player_U,1,T);//玩家的技能发动。
+                    ENEMY_U[N_P_C_BE_CHOSEN].Skill(SEQUENCE_Player,SEQUENCE_N_P_C[N_P_C_BE_CHOSEN],ENEMY_U[N_P_C_BE_CHOSEN],Player_U,0,T);//NPC的技能发动。
                     ENEMY_U[N_P_C_BE_CHOSEN].BE_ATTACKED(T.t);
                     if(Player_U.Outfit_E.SPLASH!=0) {
                         for (T.t = 0; T.t < N_N; T.t++) {
@@ -716,7 +805,9 @@ public class Orc {
                             }
                         }
                     }
-                    SEQUENCE_Player=0;
+                    //此为溅射效果的实现。
+                    SEQUENCE_Player=0;//顺序值清零。
+                    //以上：玩家回合。
                 }else if(SEQUENCE_N_P_C[N_P_C_TURN]>=100){
                     T.u=ENEMY_U[N_P_C_TURN].CHECK_ATK_U()-Player_U.DEF_U;
                     if(T.u<1){
@@ -725,7 +816,7 @@ public class Orc {
                     T.t=ENEMY_U[N_P_C_TURN].CHECK_Time()*T.u;
                     System.out.print("***对方动作 "+ENEMY_U[N_P_C_TURN].CHECK_Name()+"对"+Player_U.Name+"造成了");
                     if(ENEMY_U[N_P_C_TURN].CHECK_Time()>1){
-                        System.out.print(ENEMY_U[N_P_C_TURN].CHECK_Time()+"次");
+                        System.out.print(ENEMY_U[N_P_C_TURN].CHECK_Time()+"次");//若有连击，显示连击。
                     }
                     System.out.print(T.u+"点伤害***");
                     System.out.print('\n');
@@ -734,6 +825,7 @@ public class Orc {
                     Player_U.RED-=T.t;
                     SEQUENCE_N_P_C[N_P_C_TURN]=0;
                 }
+                //以上：NPC回合。
                 System.out.print(Player_U.Name+"剩余血量："+Player_U.RED+"/"+Player_U.RED_MAX);
                 T.SHOW_RED(Player_U.RED,Player_U.RED_MAX);
                 System.out.print('\n');
@@ -742,6 +834,7 @@ public class Orc {
                     T.SHOW_RED(ENEMY_U[T.t].CHECK_RED(), ENEMY_U[T.t].CHECK_RED_MAX());
                 }
                 System.out.print('\n');
+                //以上：显示当前血量。
                 if(Player_U.RED<=0){
                     Player_U.ALIVE=false;
                 }
@@ -754,6 +847,7 @@ public class Orc {
                 }
                 Player_U.REFRESH();
                 in.nextLine();
+                //刷新所有角色的状态。
             }
             if(Player_U.ALIVE){
                 System.out.println("*****U Survived*****");
@@ -843,6 +937,8 @@ public class Orc {
                                 BINGO_S[4] = true;
                             }
                         }
+                        break;
+                    default:
                 }
                 EXP_SUM=0;
                 for(T.t=0;T.t<N_N;T.t++){
@@ -851,6 +947,7 @@ public class Orc {
                 System.out.println("你获得了"+EXP_SUM+"点经验。你的熟练度增加了，如果你足够幸运的话。");
                 Player_U.EXP+=EXP_SUM;
                 Player_U.PRA+=Player_U.LUCK;
+                //获胜后的结算。
             }else{
                 System.out.println("*****U Died*****");
             }
